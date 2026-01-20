@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天臣集团：文件保护管理规范 v7.5</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts (Noto Sans SC) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --primary-blue: #2563eb; --slate-dark: #0f172a; }
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f4f7fa; color: #1e293b; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+        
+        /* 解决遮挡：全局滚动补偿 */
+        html { scroll-padding-top: 110px; }
+        
+        .chart-container { position: relative; width: 100%; height: 260px; margin: 0 auto; }
+        .nav-active { color: var(--primary-blue); font-weight: 700; border-bottom: 2px solid var(--primary-blue); }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @media (min-width: 768px) {
+            .flow-bridge { position: relative; display: flex; align-items: center; justify-content: center; width: 1.5rem; flex-shrink: 0; }
+            .flow-bridge::after { content: ''; width: 100%; height: 1px; background-color: #cbd5e1; }
+        }
+
+        /* 交互反馈 */
+        .process-card { transition: all 0.2s ease-out; border: 1.5px solid #ffffff; background: #ffffff; cursor: pointer; }
+        .process-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .process-card.active { border-color: var(--primary-blue); background-color: #eff6ff; box-shadow: 0 8px 24px -8px rgba(37, 99, 235, 0.2); }
+
+        .level-btn { transition: all 0.2s ease; border: 1px solid #e2e8f0; }
+        .level-btn.active { background-color: var(--slate-dark); color: #ffffff; border-color: var(--slate-dark); }
+        
+        .evolution-card { border-top: 4px solid #e2e8f0; transition: border-color 0.4s ease; }
+        .evolution-card:hover { border-top-color: var(--primary-blue); background-color: #ffffff; }
+
+        .glass-header { background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        .roadmap-line { position: relative; }
+        .roadmap-line::before { content: ''; position: absolute; left: 1rem; top: 0; bottom: 0; width: 2px; background: #e2e8f0; }
+
+        /* 文本排版优化 */
+        p, li { line-height: 1.7; letter-spacing: 0.01em; }
+        .text-balance { text-wrap: balance; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="glass-header text-white shadow-2xl sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center text-sm">
+            <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg shadow-inner">TC</div>
+                <div>
+                    <h1 class="text-base font-bold tracking-tight">天臣集团文件保护管理规范</h1>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-[0.1em] font-medium opacity-80">Confidentiality Protocol v7.5</p>
+                </div>
+            </div>
+            <nav class="flex w-full md:w-auto overflow-x-auto no-scrollbar space-x-6 lg:space-x-10 font-medium px-2">
+                <button onclick="navTo('dashboard')" id="nav-dashboard" class="nav-link nav-active py-1 whitespace-nowrap">战略综述</button>
+                <button onclick="navTo('workflow')" id="nav-workflow" class="nav-link py-1 whitespace-nowrap">管控流程</button>
+                <button onclick="navTo('schemes')" id="nav-schemes" class="nav-link py-1 whitespace-nowrap">方案演进</button>
+                <button onclick="navTo('legal')" id="nav-legal" class="nav-link py-1 whitespace-nowrap">监管法律</button>
+                <button onclick="navTo('roadmap')" id="nav-roadmap" class="nav-link py-1 whitespace-nowrap">实施路线</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8 space-y-12">
+
+        <!-- SECTION 1: SUMMARY -->
+        <section id="dashboard" class="page-section animate-fade-in">
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8 md:p-12 overflow-hidden">
+                <h2 class="text-2xl font-bold text-slate-800 mb-10 border-l-4 border-blue-600 pl-6">保密管理战略方针</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                    <div class="space-y-8">
+                        <p class="text-slate-600 leading-relaxed text-lg text-balance">
+                            光刻设计业务是天臣的核心护城河。本方案致力于通过<b>物理隔离、行为审计、司法溯源</b>三维手段，将传统的被动管理转化为主动防御，实现核心资产的全生命周期受控。
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow">
+                                <h5 class="font-bold text-slate-800 text-base mb-2 tracking-tight">资产定密管理</h5>
+                                <p class="text-sm text-slate-500 leading-relaxed">对光刻算法、工艺参数、未发布方案实行“落地即定密”管理。</p>
+                            </div>
+                            <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100 shadow-sm hover:shadow-md transition-shadow">
+                                <h5 class="font-bold text-blue-800 text-base mb-2 tracking-tight">方案分级路径</h5>
+                                <p class="text-sm text-blue-600 leading-relaxed">提供从 方案01 行政合规向 方案05 零信任云架构梯度演进。</p>
+                            </div>
+                            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow">
+                                <h5 class="font-bold text-slate-800 text-base mb-2 tracking-tight">关键行为审计</h5>
+                                <p class="text-sm text-slate-500 leading-relaxed">侧重审计文件导出、拷贝等动作，在管理中兼顾隐私与受控。</p>
+                            </div>
+                            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow text-balance">
+                                <h5 class="font-bold text-slate-800 text-base mb-2 tracking-tight">物理防线封锁</h5>
+                                <p class="text-sm text-slate-500 leading-relaxed">核心红区实行手机入柜，终端物理接口采取强制锁定策略。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 rounded-[2rem] p-10 text-white flex flex-col justify-center shadow-2xl relative">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase mb-10 tracking-[0.3em] text-center">核心合规指标</h4>
+                        <div class="space-y-12 relative z-10">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-5">
+                                <span class="text-base font-light opacity-90">销售对接环节沟通留痕率</span>
+                                <span class="text-blue-400 font-bold text-2xl tracking-tighter">100%</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-5">
+                                <span class="text-base font-light opacity-90">设计资产物理离地率</span>
+                                <span class="text-blue-400 font-bold text-2xl tracking-tighter">L5 全覆盖</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-5">
+                                <span class="text-base font-light opacity-90">外交互文件溯源成功率</span>
+                                <span class="text-blue-400 font-bold text-2xl tracking-tighter">≥ 95%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: WORKFLOW -->
+        <section id="workflow" class="page-section hidden space-y-8">
+            <div class="bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
+                    <h2 class="text-2xl font-bold text-slate-800 border-l-4 border-blue-600 pl-6">业务全流程管控节点</h2>
+                    <div class="text-xs bg-blue-50 text-blue-600 px-5 py-2 rounded-full font-bold shadow-sm whitespace-nowrap">
+                        点击下方节点方块查看风险与对标措施
+                    </div>
+                </div>
+
+                <div id="flow-container" class="flex overflow-x-auto pb-12 no-scrollbar items-center justify-between">
+                    <!-- JS Injected -->
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-4">
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-slate-50 p-10 rounded-[2rem] border border-slate-200 min-h-[420px] shadow-inner">
+                            <div class="flex justify-between items-center mb-10 border-b border-slate-200 pb-6">
+                                <h3 id="detail-title" class="text-xl font-bold text-slate-900 tracking-tight">请选择环节</h3>
+                                <div id="detail-tag"></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-balance">
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-5 tracking-widest border-l-2 border-slate-300 pl-4">风险分析 (风险)</h4>
+                                    <ul id="detail-risks" class="text-sm text-slate-600 space-y-4 list-disc list-inside font-medium leading-relaxed"></ul>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-blue-500 uppercase mb-5 tracking-widest border-l-2 border-blue-400 pl-4">管控措施 (措施)</h4>
+                                    <ul id="detail-measures" class="text-sm text-slate-600 space-y-4 list-none"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-amber-50 border-l-4 border-amber-400 p-6 rounded-r-2xl shadow-sm">
+                            <p class="text-sm text-amber-800 font-bold mb-2 flex items-center italic">
+                                <span class="mr-2">■</span> 管理警示：
+                            </p>
+                            <p id="detail-alert" class="text-sm text-amber-700 leading-relaxed font-medium"></p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-10 rounded-[2rem] border border-slate-200 flex flex-col items-center justify-center shadow-inner">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-10 tracking-widest">风险分布量化分析</h4>
+                        <div class="chart-container">
+                            <canvas id="riskRadarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: SCHEMES -->
+        <section id="schemes" class="page-section hidden space-y-10">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 px-2">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 border-l-4 border-blue-600 pl-6">方案演进路线图</h2>
+                    <p class="text-sm text-slate-500 mt-2">按需匹配防御强度，确保资源投入最优效率。</p>
+                </div>
+                <div id="level-tabs" class="flex overflow-x-auto p-1.5 bg-white border border-slate-200 rounded-2xl shadow-sm w-full lg:w-auto no-scrollbar">
+                    <!-- JS Injected -->
+                </div>
+            </div>
+
+            <div id="scheme-matrix" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="bg-slate-900 rounded-[2rem] p-12 text-white flex flex-col md:flex-row justify-between items-center shadow-2xl border border-slate-800 relative overflow-hidden">
+                <div class="max-w-2xl">
+                    <h3 id="current-scheme-name" class="text-xl font-bold text-blue-400 mb-2">方案加载中...</h3>
+                    <p id="current-scheme-logic" class="text-sm text-slate-400 italic mt-3 leading-relaxed">正在检索管理思路模型...</p>
+                </div>
+                <div class="text-center md:text-right md:border-l md:border-slate-800 md:pl-12 pt-8 md:pt-0 mt-8 md:mt-0">
+                    <span class="text-xs text-slate-500 block uppercase font-bold tracking-widest mb-3 whitespace-nowrap">年度投入预算估算</span>
+                    <span id="current-scheme-cost" class="text-3xl font-bold text-white tracking-tighter">---</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: LEGAL -->
+        <section id="legal" class="page-section hidden space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Punishment -->
+                <div class="bg-white p-10 rounded-[2rem] border border-slate-200 shadow-sm">
+                    <h2 class="text-xl font-bold text-slate-800 mb-10 flex items-center">
+                        <span class="w-2 h-6 bg-slate-300 mr-4"></span> 惩处红线制度
+                    </h2>
+                    <div class="space-y-6">
+                        <div class="p-6 bg-slate-50 border-l-4 border-slate-300 rounded-r-2xl shadow-sm">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-bold text-slate-900 text-base">一类违规 (失误性行为)</span>
+                                <span class="text-xs font-bold text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200">处罚：200 元</span>
+                            </div>
+                            <p class="text-sm text-slate-500 leading-relaxed">离座未锁屏、带手机入核心红区、废料混扔。处罚：全公司通报批评。</p>
+                        </div>
+                        <div class="p-6 bg-slate-50 border-l-4 border-slate-500 rounded-r-2xl shadow-sm">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-bold text-slate-900 text-base">二类违规 (规规操作)</span>
+                                <span class="text-xs font-bold text-slate-700 bg-white px-3 py-1 rounded-full border border-slate-300">处罚：当月全绩效</span>
+                            </div>
+                            <p class="text-sm text-slate-500 leading-relaxed text-balance">私接非授权存储设备、绕过内网防火墙访问外网。处罚：书面警告且取消当年评优。</p>
+                        </div>
+                        <div class="p-8 bg-slate-800 border-l-4 border-slate-900 rounded-r-2xl text-white shadow-xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="font-bold text-slate-200 text-base">三级违规 (恶意泄密)</span>
+                                <span class="text-xs font-bold text-slate-400 bg-slate-700 px-3 py-1 rounded-full border border-slate-600">解除劳动合同</span>
+                            </div>
+                            <p class="text-slate-400 leading-relaxed text-sm">蓄意拷贝并外发核心源文件。后果：依据《劳动合同法》第39条直接辞退无补偿，并移交刑事调查。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Legal -->
+                <div class="bg-white p-10 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 mb-10 flex items-center">
+                            <span class="w-2 h-6 bg-blue-600 mr-4"></span> 法律实务与危机取证
+                        </h2>
+                        <div class="space-y-10 text-sm text-slate-600 leading-relaxed text-balance">
+                            <div class="border-b border-slate-50 pb-8">
+                                <h4 class="font-bold text-slate-800 mb-4 text-base">1. 商业秘密法律认定</h4>
+                                <p class="text-sm leading-relaxed">依据<b>《反不正当竞争法》第9条</b>，本规范所述的技术隔离、加密及行为审计属于法定“保密措施”，是公司维权的证据核心。</p>
+                            </div>
+                            <div class="border-b border-slate-50 pb-8">
+                                <h4 class="font-bold text-slate-800 mb-4 text-base">2. 竞业限制执行</h4>
+                                <p class="text-sm leading-relaxed">核心岗需签署竞业协议。离职后公司按月支付<b>≥平均工资30%</b>的补偿金，确保协议效力。</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 mb-4 text-base">3. 电子取证与刑事报案</h4>
+                                <p class="text-sm leading-relaxed">触发警报后即刻启动<b>电子取证(Forensics)</b>制作镜像并公证。损失评估>50万元即触犯《刑法》第219条。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 修复手机端溢出问题 -->
+                    <div class="mt-12 p-6 bg-blue-50 rounded-2xl border border-blue-100 text-center shadow-inner overflow-hidden">
+                        <p class="text-xs text-blue-600 font-bold uppercase tracking-wider text-balance leading-relaxed">
+                            响应流：风险阻断 &rarr; 镜像取证 &rarr; 司法公证 &rarr; 刑事控告
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: ROADMAP (IMPLEMENTATION) -->
+        <section id="roadmap" class="page-section hidden">
+            <div class="bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-slate-800 mb-10 border-l-4 border-blue-600 pl-6">实施结论与部署路径</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-slate-900 text-white p-10 rounded-[2rem] shadow-xl">
+                            <h3 class="text-xl font-bold mb-6 text-blue-400">核心结论</h3>
+                            <p class="text-sm text-slate-400 leading-relaxed mb-8 text-balance">
+                                保密管理不应是生产的阻碍，而应是资产价值化的前提。通过本路线图的演进，将构建不可逆的数据主权体系。
+                            </p>
+                            <ul class="text-sm space-y-6 text-slate-300">
+                                <li class="flex items-start"><span class="mr-3 text-blue-400 font-bold">●</span> 核心资产实现物理与逻辑全链路隔离。</li>
+                                <li class="flex items-start"><span class="mr-3 text-blue-400 font-bold">●</span> 审计模型从“防盗”向“动作分析”升级。</li>
+                                <li class="flex items-start"><span class="mr-3 text-blue-400 font-bold">●</span> 司法闭环对内外部形成终极保护威慑。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 space-y-10">
+                        <div class="roadmap-line space-y-12 pl-6">
+                            <div class="relative pl-14">
+                                <div class="absolute left-[-30px] top-0 w-14 h-14 bg-white border-4 border-blue-600 rounded-full flex items-center justify-center font-bold text-blue-600 shadow-md">1</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-lg mb-3">第一阶段：底座加固</h4>
+                                    <p class="text-sm text-slate-500 mb-4 leading-relaxed">全面落地 方案01。重点聚焦销售对接离线站建设，物理接口硬件级封锁，落实三级处罚制度。</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-4 py-1.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full">物理锁固</span>
+                                        <span class="px-4 py-1.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full">纪律整肃</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative pl-14">
+                                <div class="absolute left-[-30px] top-0 w-14 h-14 bg-white border-4 border-slate-300 rounded-full flex items-center justify-center font-bold text-slate-400">2</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-lg mb-3">第二阶段：行为存证</h4>
+                                    <p class="text-sm text-slate-500 mb-4 leading-relaxed text-balance">推进 方案02 至 方案03。部署透明加密系统。开启<b>关键行为审计与屏幕录像</b>，上线<b>动态工号浮动水印</b>。</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full">加密内核</span>
+                                        <span class="px-4 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full">存证溯源</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative pl-14">
+                                <div class="absolute left-[-30px] top-0 w-14 h-14 bg-white border-4 border-slate-300 rounded-full flex items-center justify-center font-bold text-slate-400">3</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-lg mb-3 font-bold">第三阶段：零信任架构</h4>
+                                    <p class="text-sm text-slate-500 mb-4 leading-relaxed">完成 方案04 与 05 部署。实现核心资产“物理不落地”。达成云桌面主权与全域屏蔽环境。</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded-full">数据不落地</span>
+                                        <span class="px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded-full">AI 追溯</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-10 mt-auto">
+        <div class="container mx-auto px-6 text-center text-slate-400 text-[10px] uppercase tracking-[0.4em] font-bold">
+            <p>&copy; 2026 天臣集团保密管理委员会 | 内部机密 严禁扩散</p>
+        </div>
+    </footer>
+
+    <script>
+        const workflowData = [
+            {
+                id: 'w1', title: '销售对接', type: '常规管控', icon: '📱',
+                risks: ['存储介质携带病毒植入内网', '社交软件收发导致机密外泄', '输入文件缺乏审计登记'],
+                measures: ['部署物理隔离导入站', '外部 U 盘强制查杀登记', '禁止私人手机接收生产文档'],
+                alert: '销售是公司唯一对外物理接口。若必须微信接收，需用专用手机并物理导出。',
+                radar: [40, 80, 40, 60, 20]
+            },
+            {
+                id: 'w2', title: '设计排版', type: '常规管控', icon: '🎨',
+                risks: ['设计底稿非授权拷贝外流', '内网违规连接外部网络', '机箱硬盘被擅自拆卸'],
+                measures: ['物理 USB 端口锁死', '办公网完全物理断网隔离', '机箱防拆封条与物理锁'],
+                alert: '查资限专用区域操作。通过单向摆渡设备或物理介质导入。',
+                radar: [80, 20, 70, 40, 30]
+            },
+            {
+                id: 'w3', title: '光刻设计', type: '核心风险', icon: '🔒',
+                risks: ['光刻核心参数及算法泄露', '手机翻拍终端屏幕内容', '设计逻辑被第三方破解'],
+                measures: ['关键行为审计及屏幕录像', '随机动态工号浮动水印', '红区全封闭隔离管理'],
+                alert: '此处产出公司核心资产。必须红工牌准入，操作端实施双人相互复核。',
+                radar: [90, 60, 80, 50, 90]
+            },
+            {
+                id: 'w4', title: '制版输出', type: '常规管控', icon: '⚙️',
+                risks: ['工艺参数输出后未清除', '菲林及版材废料流出厂区', '打印队列缺乏追溯记录'],
+                measures: ['VLAN 逻辑物理双隔离', '涉密废料红桶监销制度', '刷卡打印模式留存快照'],
+                alert: '制版数据坚持“即用即清”。废弃菲林必须在监督下进行物理剪碎或销毁。',
+                radar: [70, 30, 60, 90, 40]
+            },
+            {
+                id: 'w5', title: '样张交付', type: '核心风险', icon: '📦',
+                risks: ['样张流失或被精准拍照', '交付确认稿包含矢量路径', '快递物流环节发生丢件'],
+                measures: ['嵌入司法指纹水印', '样张唯一编码追溯系统', '交付物脱敏处理(<150dpi JPG)'],
+                alert: '外发 PDF 必须锁死打印权限。样品通过专人或保密物流通道进行递送。',
+                radar: [50, 90, 50, 40, 70]
+            }
+        ];
+
+        const schemeEvolution = [
+            {
+                id: 1, name: "方案 01：行政合规型", cost: "≤ 10 万元 / 年", 
+                logic: "以行政规范为核心，辅以物理锁具堵塞最明显的漏洞点。",
+                stages: [
+                    { stage: "需求阶段", points: ["设立物理隔断导入站","外部介质接收台账强登记","禁止私人账号收发生产文件"] },
+                    { stage: "设计阶段", points: ["物理 USB 端口锁全量封堵","机箱防拆封条/物理加锁","设立隔离区互联网查资点"] },
+                    { stage: "车间阶段", points: ["划定红色保密红区标识","场前电子设备存柜管理","废料红桶专人监销台账"] },
+                    { stage: "销售阶段", points: ["严禁外发矢量源工程文件","JPG 分辨率强控 <150dpi","画面中央显性半透明水印"] }
+                ]
+            },
+            {
+                id: 2, name: "方案 02：边界防护型", cost: "20 - 50 万元 / 年", 
+                logic: "引入 IT 审计工具。审计重点由人防转向技术记录行为轨迹。",
+                stages: [
+                    { stage: "需求阶段", points: ["企业 NAS 分类存储管理","部署邮件安全网关附件过滤","文件入库执行自动杀毒清洗"] },
+                    { stage: "设计阶段", points: ["部署行为审计系统 (DLP)","USB 识别码 VID/PID 白名单","禁止安装非办公社交软件"] },
+                    { stage: "车间阶段", points: ["VLAN 逻辑物理双隔离","中转摆渡数据传输系统","刷卡打印与内容快照审计"] },
+                    { stage: "销售阶段", points: ["PDF 权限锁：禁止内容复制","外发申请在线审批流程"] }
+                ]
+            },
+            {
+                id: 3, name: "方案 03：隔离与加密型", cost: "50 - 100 万元 / 年", 
+                logic: "内核级自动加密。侧重“行为审计”而非全过程录像，兼顾隐私。",
+                stages: [
+                    { stage: "需求阶段", points: ["文档落地即自动执行加密","核心库权限实时审批机制","离开受控环境文件自动失效"] },
+                    { stage: "设计阶段", points: ["记录关键审计及录屏行为","屏幕覆盖动态工号水印","受控程序策略 (CAD/Corel)"] },
+                    { stage: "车间阶段", points: ["机台读写权限严格授权","部署单向传输开关设备","P-5 级保密销毁粉碎机部署"] },
+                    { stage: "销售阶段", points: ["制作加密外发控制包","协作平台预览，文件不落地"] }
+                ]
+            },
+            {
+                id: 4, name: "方案 04：主动溯源型", cost: "100 - 200 万元 / 年", 
+                logic: "AI 模型识别高危异常动作。具备泄密后的指纹级反向定位能力。",
+                stages: [
+                    { stage: "需求阶段", points: ["嵌入不可见指纹指纹系统","各迭代版本指纹库建立","资产全生命周期检索系统"] },
+                    { stage: "设计阶段", points: ["行为 AI 分析建模审计系统","识别非正常时段动作行为","高危行为账号自动阻断熔断"] },
+                    { stage: "车间阶段", points: ["RFID 资产全量围栏系统","菲林袋内嵌追踪感应标签","门口联动感应高清抓拍系统"] },
+                    { stage: "销售阶段", points: ["金丝雀陷阱针对性纹理植入","市场上假货逆向扫描定责"] }
+                ]
+            },
+            {
+                id: 5, name: "方案 05：零信任主权型", cost: "> 300 万元 / 年", 
+                logic: "数据彻底云化。终端仅作为视频流显示，计算与存储全在后端服务器。",
+                stages: [
+                    { stage: "需求阶段", points: ["部署全业务云桌面 (VDI)","物理终端无本地硬盘存储","接口重定向功能完全禁用"] },
+                    { stage: "设计阶段", points: ["铜网信号屏蔽工作区环境","多因子人脸/指纹交叉认证","终端信号级 EMI 滤波控制"] },
+                    { stage: "车间阶段", points: ["AI 监测防肩窥面孔异常","操作员离座 2 秒自动锁屏","全物理断网独立计算环境"] },
+                    { stage: "销售阶段", points: ["WebAR 实时渲染沉浸展示","链接限时销毁，本地零缓存"] }
+                ]
+            }
+        ];
+
+        let radarChart;
+
+        function navTo(id) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('nav-active'));
+            const btn = document.getElementById('nav-'+id);
+            if(btn) btn.classList.add('nav-active');
+            if(id === 'workflow' && radarChart) {
+                setTimeout(() => radarChart.resize(), 100);
+            }
+        }
+
+        function initWorkflow() {
+            const container = document.getElementById('flow-container');
+            let html = '';
+            workflowData.forEach((w, index) => {
+                html += `
+                    <div class="process-card flex-shrink-0 w-[145px] md:flex-1 rounded-3xl p-6 shadow-sm" onclick="selectStep('${w.id}')" id="parent-${w.id}">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="text-3xl mb-4">${w.icon}</div>
+                            <h4 class="font-bold text-slate-800 text-[13px] mb-2 leading-tight">${w.title}</h4>
+                            <div class="text-[9px] font-bold ${w.type === '核心风险' ? 'text-blue-600' : 'text-slate-400'} uppercase tracking-tight">
+                                ${w.type}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                if(index < workflowData.length - 1) html += `<div class="flow-bridge"></div>`;
+            });
+            container.innerHTML = html;
+            selectStep('w1');
+        }
+
+        function selectStep(id) {
+            document.querySelectorAll('.process-card').forEach(d => d.classList.remove('active'));
+            const card = document.getElementById('parent-'+id);
+            if(card) card.classList.add('active');
+
+            const data = workflowData.find(x => x.id === id);
+            document.getElementById('detail-title').innerText = data.title;
+            const tagContainer = document.getElementById('detail-tag');
+            tagContainer.innerHTML = `<span class="px-3 py-1 text-[10px] font-bold rounded-full ${data.type === '核心风险' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}">${data.type}</span>`;
+            document.getElementById('detail-risks').innerHTML = data.risks.map(r => `<li class="mb-1 text-sm font-medium">${r}</li>`).join('');
+            document.getElementById('detail-measures').innerHTML = data.measures.map((m, i) => `
+                <li class="flex items-start mb-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <span class="w-4 h-4 bg-slate-100 text-slate-600 rounded flex items-center justify-center text-[9px] font-black mr-3 mt-0.5">${i+1}</span>
+                    <span class="text-[13px] text-slate-700 font-medium">${m}</span>
+                </li>
+            `).join('');
+            document.getElementById('detail-alert').innerText = data.alert;
+            if(radarChart) { radarChart.data.datasets[0].data = data.radar; radarChart.update(); }
+        }
+
+        function renderEvolutionTabs() {
+            const container = document.getElementById('level-tabs');
+            container.innerHTML = schemeEvolution.map(s => `
+                <button onclick="selectLevel(${s.id})" id="lev-btn-${s.id}" class="level-btn px-6 py-2.5 rounded-xl text-xs font-bold transition-all">
+                    方案 0${s.id}
+                </button>
+            `).join('');
+            selectLevel(1);
+        }
+
+        function selectLevel(id) {
+            document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('lev-btn-'+id).classList.add('active');
+            const s = schemeEvolution.find(x => x.id === id);
+            document.getElementById('current-scheme-name').innerText = s.name;
+            document.getElementById('current-scheme-logic').innerText = `管理思路：${s.logic}`;
+            document.getElementById('current-scheme-cost').innerText = s.cost;
+            const matrix = document.getElementById('scheme-matrix');
+            matrix.innerHTML = s.stages.map(step => `
+                <div class="evolution-card bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+                    <span class="text-xs font-bold text-blue-600 block mb-5 uppercase tracking-[0.2em] border-b border-blue-50 pb-2 flex items-center">
+                        <span class="w-1.5 h-1.5 bg-blue-500 mr-2 rounded-full"></span> ${step.stage}
+                    </span>
+                    <ul class="text-sm text-slate-600 space-y-3 list-none">
+                        ${step.points.map(p => `<li class="flex items-start text-xs"><span class="mr-3 text-blue-400 font-bold">·</span>${p}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        function initCharts() {
+            const ctxRadar = document.getElementById('riskRadarChart').getContext('2d');
+            radarChart = new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: ['物理隔离', '信息加密', '合规审计', '物理防护', '司法取证'],
+                    datasets: [{
+                        data: [0,0,0,0,0],
+                        backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                        borderColor: '#2563eb',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { r: { beginAtZero: true, max: 100, ticks: { display: false }, grid: { color: '#f1f5f9' }, angleLines: { color: '#f1f5f9' } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        window.onload = () => { initCharts(); initWorkflow(); renderEvolutionTabs(); };
+    </script>
+</body>
+</html>
